@@ -1,9 +1,0 @@
-{% if treatment == "success" %}
-    <p>Conservative treatment was a success. Evidence: {{ evidence }}</p>
-{% elif treatment == "failure" %}
-    <p>Conservative treatment failed. Evidence: {{ evidence }}</p>
-{% elif treatment == "na" %}
-    <p>Conservative treatment status unknown.</p>
-{% else %}
-    <p>Invalid treatment status.</p>
-{% endif %}

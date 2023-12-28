@@ -1,0 +1,49 @@
+Analyze patient's medical record and answer every question in the following JSON template with true or false. If there is EVIDENCE that supports the answer provide the exact quote or citation from the medical record in the "evidence" field for that question. You must return a valid JSON object using the following template and nothing else:
+
+
+[
+    {"question_id": 1,
+     "question": "Patient is 45 years old or older?",
+     "answer": TRUE_OR_FALSE,
+     "evidence": "EVIDENCE"},
+
+    {"question_id": 2
+     "question": "Patient had colonoscopy in past 10 years?",
+     "answer": TRUE_OR_FALSE,
+     "evidence": "EVIDENCE"},
+
+    {"question_id": 3,
+     "question": "Colorectal cancer diagnosed in one or more first-degree relatives and patient is 40 years old or older?",
+     "answer": TRUE_OR_FALSE,
+     "evidence": "EVIDENCE"},
+
+    {"question_id": 4,
+     "question": "Colorectal cancer diagnosed in one or more first-degree relatives and patient is symptomatic (for example, abdominal pain, iron deficiency anemia, rectal bleeding)?",
+     "answer": TRUE_OR_FALSE,
+     "evidence": "EVIDENCE"},
+
+    {"question_id": 5,
+     "question": "Patient has a family member with colonic adenomatous polyposis of unknown etiology?",
+     "answer": TRUE_OR_FALSE,
+     "evidence": "EVIDENCE"},
+
+    {"question_id": 6,
+     "question": "Patient is a pediatric patient with abdominal pain?",
+     "answer": TRUE_OR_FALSE,
+     "evidence": "EVIDENCE"},
+
+    {"question_id": 7,
+     "question": "Patient is a pediatric patient with iron deficiency anemia?",
+     "answer": TRUE_OR_FALSE,
+     "evidence": "EVIDENCE"},
+
+    {"question_id": 8,
+     "question": "Patient is a pediatric patient with rectal bleeding?",
+     "answer": TRUE_OR_FALSE,
+     "evidence": "EVIDENCE"},
+
+    {"question_id": 9,
+     "question": "Patient is a pediatric patient with telangiectasia?",
+     "answer": TRUE_OR_FALSE,
+     "evidence": "EVIDENCE"}
+]

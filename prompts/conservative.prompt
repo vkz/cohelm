@@ -1,0 +1,6 @@
+Analyze patient's medical record and answer the following question with true or false. If there is EVIDENCE that supports the answer provide a exact quote or citation from the medical record. You must return a valid JSON object using the following template and nothing else:
+
+
+{"question": "Was conservative treatment attempted and succeeded?",
+ "answer": TRUE_OR_FALSE,
+ "evidence": "EVIDENCE"}
