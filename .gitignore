@@ -1,0 +1,15 @@
+.direnv/
+.env
+**/__pycache__
+*.pyc
+db.sqlite3
+*.log
+*~
+.#*
+\#*\#
+,*
+GTAGS
+CTAGS
+TAGS
+.DS_Store
+/node_modules
