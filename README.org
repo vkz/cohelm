@@ -4,7 +4,7 @@
 2. Upload a sample medical record
 3. Wait ... wait ... then wait some more.
 
-I opted to play with OpenAI Assistants API which BETA and it shows. It is half baked and excruciatingly slow.
+I opted to play with OpenAI Assistants API which is very much BETA and it shows. It is half baked and excruciatingly slow.
 
 See **Notes** below for more details
 
@@ -31,7 +31,7 @@ Add the following to your .zshrc or .bashrc accordingly
 
 #+begin_src shell
   # ~/.bashrc
-  # -------
+  # ---------
   eval "$(direnv hook bash)"
 
   setopt PROMPT_SUBST
@@ -45,7 +45,7 @@ Add the following to your .zshrc or .bashrc accordingly
 
 
   # ~/.zshrc
-  # ------
+  # --------
   eval "$(direnv hook zsh)"
 
   setopt PROMPT_SUBST
@@ -65,6 +65,8 @@ Clone the repo, activate virtual environment, install dependencies
 #+begin_src shell
   $ git clone git@github.com:vkz/cohelm.git
   $ cd cohelm
+  # you only need allow once
+  $ direnv allow
   $ python -m ensurepip --upgrade
   # assuming your direnv has been set up correctly virtual env will activate
   $ pip3 install -r requirements.txt
@@ -122,9 +124,25 @@ Medical records are so small, that honestly vectorizing them is overkill. All pr
 
 I wanted to try something new, so I opted to play with a shiny and new [[https://platform.openai.com/docs/assistants/overview][OpenAI Assistants API]].
 
-Mostly it saves us the need to do data extraction and embeddings, cause it takes care of tha part "automagically".
+Mostly it saves us the need to do data extraction and embeddings, cause it takes care of that part "automagically".
 
 It turned out a mixed bag. Very much BETA:
 - some endpoints are missing in the official SDK,
 - runs are excruciatingly slow,
 - runs require polling
+
+
+*** Promts and robust results
+
+=prompts/= will tell you the approach I took, namely forcing LLM to return well-formed JSON objects. In my experience this is a hit and miss approach but can be made to work somewhat reliably. Essentially, we want LLM to always respond with valid JSON based on the JSON template we provide. To make it somewhat more reliable we'd want ot intro basic validation followed by possible retries:
+1. try to parse and validate LLM response as JSON. My code does that.
+2. if response is invalid, trigger a retry. I've not had time to do that bit, but it is easy enough.
+
+
+Instead of JSON we could've used Pydantic models or whatever else structured format. This wouldn't significantly improve the situation if at all.
+
+*** Alternative approach to robust results
+
+For lack of time and since I've been playing with the API that's new to me, I opted to not take the approach I know to be more reliable from experience. That is, instead of forcing the return to be a valid structure like JSON, we supply a handful of functions that LLM must call to provide results, e.g.:
+- =result(true | false)= would unambiguously answer whatever question we asked,
+- =evidence("" | "quote from medical record when available")=
