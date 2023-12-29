@@ -146,3 +146,10 @@ Instead of JSON we could've used Pydantic models or whatever else structured for
 For lack of time and since I've been playing with the API that's new to me, I opted to not take the approach I know to be more reliable from experience. That is, instead of forcing the return to be a valid structure like JSON, we supply a handful of functions that LLM must call to provide results, e.g.:
 - =result(true | false)= would unambiguously answer whatever question we asked,
 - =evidence("" | "quote from medical record when available")=
+
+
+*** Hallucinations
+
+That one is tricky. By asking for evidence as quotes or citations we address it to some degree, but certainly not 100%. Other than improving prompts, one possible approach could be to lean more on vector "distance" for embeddings e.g. whenever LLM provides "evidence" we search for embeddings that are "very close" and only accept such "evidence". Else we could supply a few embeddings that are close to the question being asked and only accept "evidence" that's one of the embeddings supplied verbatim.
+
+Whatever the approach, it'll require lots of experiments.
