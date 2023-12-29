@@ -4,8 +4,11 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django import forms
 import os
-import ai
+from app import ai
 from django.urls import reverse
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class UploadFileForm(forms.Form):
@@ -38,6 +41,7 @@ def handle_uploaded_file(f):
 
 def analyze(request):
     file_hash = request.GET.get("file")
+    log.info("analyzing file " + file_hash)
     if file_hash is None:
         return HttpResponseRedirect("/")
     thread_id = ai.create_thread(file_hash)

@@ -1,3 +1,4 @@
+import logging
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
@@ -5,6 +6,8 @@ from openai import OpenAI
 import requests
 import time
 import json
+
+log = logging.getLogger(__name__)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -39,7 +42,7 @@ if assistant_id is None:
 
 def upload_file(file_hash):
     # Check if the file has already been uploaded to OpenAI
-    files = client.beta.files.list(purpose="assistants")
+    files = client.files.list(purpose="assistants")
 
     file_id = None
     for file in files.data:
@@ -54,6 +57,9 @@ def upload_file(file_hash):
             purpose="assistants",
         )
         file_id = file.id
+        log.info("Uploaded file " + file_hash + ".pdf")
+    else:
+        log.info("File " + file_hash + ".pdf already uploaded")
 
     # Now write file.id to uploads/file_hash.id
     with open(os.path.join("uploads", file_hash + ".id"), "w+") as file:
@@ -77,6 +83,8 @@ def create_thread(file_hash):
         ],
         metadata={"file": file_hash},
     )
+
+    log.info("Created thread " + thread.id)
 
     with open(os.path.join("uploads", file_hash + ".threads"), "a") as file:
         file.write(thread.id + "\n")
@@ -106,7 +114,10 @@ def threads(delete=False):
 
 
 def run_prompt(thread_id=None, prompt_path=None):
+    log.info(f"Starting prompt {prompt_path} on thread {thread_id}")
+
     if thread_id is None or prompt_path is None:
+        log.error("expected thread_id and prompt_path")
         raise Exception("expected thread_id and prompt_path")
 
     prompt = ""
@@ -114,10 +125,13 @@ def run_prompt(thread_id=None, prompt_path=None):
         prompt = file.read()
 
     # enqueue the prompt
-    client.beta.threads.messages.create(
+    message = client.beta.threads.messages.create(
         thread_id,
         role="user",
         content=prompt,
+    )
+    log.info(
+        f"Enqueued prompt {prompt_path} as message {message.id} on thread {thread_id}"
     )
 
     # start a run
@@ -125,9 +139,11 @@ def run_prompt(thread_id=None, prompt_path=None):
         thread_id=thread_id,
         assistant_id=assistant_id,
     )
+    log.info(f"Started run {run.id} for prompt {prompt_path} on thread {thread_id}")
 
     # poor man's polling
-    while run.status != "complete":
+    while run.status != "completed":
+        log.info(f"Waiting for run {run.id} to complete: status is {run.status}")
         time.sleep(3)
         run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
         if (
@@ -138,31 +154,47 @@ def run_prompt(thread_id=None, prompt_path=None):
             return f"Run failed for {prompt_path}: assistant run failed"
 
     # return last assistant message
-    messages = client.beta.threads.messages.list(thread_id).data
+    messages = client.beta.threads.messages.list(thread_id)
+    # log.debug(
+    #     "Messages from assistant:\n"
+    #     + messages.model_dump_json(indent=2, exclude_unset=True)
+    # )
 
-    # get the last message from the assistant
-    reply = messages[-1]
+    # we punt here and assume assistant will have added a single message
+    reply = messages.data[0]
+    log.debug(
+        "Reply from assistant:\n" + reply.model_dump_json(indent=2, exclude_unset=True)
+    )
     reply_text = reply.content[0].text.value
 
     if reply.role != "assistant":
+        log.error(f"Run failed for {prompt_path}: reply role was {reply.role}")
         return f"Run failed for {prompt_path}: assistant did not reply"
+
+    log.debug(f"Reply from assistant: {reply_text}")
 
     # poor man's validation by parsing the result as JSON
     try:
         reply_json = json.loads(reply_text)
-        json.dumps(reply_json, indent=4)
+        log.debug("Assistant reply:\n" + json.dumps(reply_json, indent=4))
         return reply_text
     except json.JSONDecodeError:
-        return f"Run failed for {prompt_path}: assistant replied with invalid JSON"
+        log.error(f"Run failed for {prompt_path}: assistant replied with invalid JSON")
+        return f"Run failed for {prompt_path}: assistant replied with invalid JSON {reply_text}"
+
+    return reply_text
 
 
 def prompt_cpt_codes(thread_id):
-    run_prompt(thread_id=thread_id, prompt_path="prompts/cpt.prompt")
+    log.info(f"Prompting for cpt codes on thread {thread_id}")
+    return run_prompt(thread_id=thread_id, prompt_path="prompts/cpt.prompt")
 
 
 def prompt_conservative_treatment(thread_id):
-    run_prompt(thread_id=thread_id, prompt_path="prompts/conservative.prompt")
+    log.info(f"Prompting for conservative treatment on thread {thread_id}")
+    return run_prompt(thread_id=thread_id, prompt_path="prompts/conservative.prompt")
 
 
 def prompt_guidelines(thread_id):
-    run_prompt(thread_id=thread_id, prompt_path="prompts/guidelines.prompt")
+    log.info(f"Prompting for guidelines on thread {thread_id}")
+    return run_prompt(thread_id=thread_id, prompt_path="prompts/guidelines.prompt")

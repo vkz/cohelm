@@ -1,3 +1,3 @@
-Extract the CPT codes from the medical record to identify which treatment has been recommended by the doctor. These appear at the end of the medical record after "Requested procedure:" and can be a single number or a comma separated list of numbers. You must return a valid JSON object using the following template and nothing else:
+Extract the CPT codes from the medical record. These appear at the very end of the medical record after "Requested procedure:" and can be a single number or a comma separated list of numbers. Reply with a single JSON object and say nothing else. Use the following template for your reply replacing LIST_OF_CPT_CODES with the CPT codes you extracted:
 
-{"CPT": [LIST_OF_CPT_CODES]}
+{"CPT": "LIST_OF_CPT_CODES"}
