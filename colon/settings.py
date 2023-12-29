@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-@&!p%6%@t)f10p0*7$4x$%meige2z+#q_luruxv%gb01#46j$f
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["cohelm.fullmeta.co.uk", "localhost", "cohelm.wild-dojo.ts.net"]
 
 
 # Application definition
@@ -142,3 +142,10 @@ LOGGING = {
         },
     },
 }
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://cohelm.fullmeta.co.uk",
+    "https://cohelm.fullmeta.co.uk",
+    "http://cohelm.wild-dojo.ts.net",
+    "https://cohelm.wild-dojo.ts.net",
+]

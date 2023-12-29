@@ -1,0 +1,130 @@
+* Try it
+
+1. Navigate to https://cohelm.fullmeta.co.uk/
+2. Upload a sample medical record
+3. Wait ... wait ... then wait some more.
+
+I opted to play with OpenAI Assistants API which BETA and it shows. It is half baked and excruciatingly slow.
+
+See **Notes** below for more details
+
+* Install
+
+If I were you, I'd just try it at https://cohelm.fullmeta.co.uk/ and not bother running locally.
+
+Well, if you insist ...
+
+** Install direnv
+
+#+begin_src shell
+  # on Mac
+  $ brew istall direnv
+
+  # on Debian or ubuntu
+  $ brew install direnv
+  $ apt install python3.11-venv
+#+end_src
+
+** Enable direnv in your .zshrc or .bashrc
+
+Add the following to your .zshrc or .bashrc accordingly
+
+#+begin_src shell
+  # ~/.bashrc
+  # -------
+  eval "$(direnv hook bash)"
+
+  setopt PROMPT_SUBST
+
+  show_virtual_env() {
+    if [[ -n "$VIRTUAL_ENV" && -n "$DIRENV_DIR" ]]; then
+      echo "($(basename $VIRTUAL_ENV))"
+    fi
+  }
+  PS1='$(show_virtual_env)'$PS1
+
+
+  # ~/.zshrc
+  # ------
+  eval "$(direnv hook zsh)"
+
+  setopt PROMPT_SUBST
+
+  show_virtual_env() {
+    if [[ -n "$VIRTUAL_ENV" && -n "$DIRENV_DIR" ]]; then
+      echo "($(basename $VIRTUAL_ENV))"
+    fi
+  }
+  PS1='$(show_virtual_env)'$PS1
+#+end_src
+
+** Clone repo, install deps, activate venv
+
+Clone the repo, activate virtual environment, install dependencies
+
+#+begin_src shell
+  $ git clone git@github.com:vkz/cohelm.git
+  $ cd cohelm
+  $ python -m ensurepip --upgrade
+  # assuming your direnv has been set up correctly virtual env will activate
+  $ pip3 install -r requirements.txt
+#+end_src
+
+** OpenAI token
+
+Add your OpenAI API token to =.env=
+#+begin_example
+  OPENAI_API_KEY=sk-...
+#+end_example
+
+** Start server
+
+Start the server
+#+begin_src shell
+  $ python manage.py runserver 0.0.0.0:8000
+#+end_src
+
+** Browse
+
+http://localhost:8000
+
+* Notes
+
+** Where's the meat of it?
+
+=app/ai.py=
+=app/views.py=
+=prompts/=
+
+** Have you accomplished all tasks?
+
+No. I only managed to squeeze a few hours here and there, but it is mostly done.
+
+Other than polish and making it a bit more robust, the missing bit is the final verdict, which amounts to:
+- parse guidelines response - where each "line" is a JSON object,
+- combine into correct boolean expression i.e. disjunction of conjunctions as per colonoscopy guidelines.
+
+Why hasn't this been done?
+
+Lack of time mostly, but also this requires LLM reliably and robustly returning valid JSON as per our templates. The all new =gpt-3.5-turbo-1106= is a bit janky there.
+
+** Approach taken and LLM robustness
+
+*** What would a typical approach look like?
+
+1. ingest and generate embeddings from medical records
+2. use OpenAI API chat completions to get answers
+
+
+Medical records are so small, that honestly vectorizing them is overkill. All prompts, guidelines and a medical record would safely fit into context window for =gpt-3.5= and =gpt-4=.
+
+*** What approach did we use?
+
+I wanted to try something new, so I opted to play with a shiny and new [[https://platform.openai.com/docs/assistants/overview][OpenAI Assistants API]].
+
+Mostly it saves us the need to do data extraction and embeddings, cause it takes care of tha part "automagically".
+
+It turned out a mixed bag. Very much BETA:
+- some endpoints are missing in the official SDK,
+- runs are excruciatingly slow,
+- runs require polling
