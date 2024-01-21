@@ -92,7 +92,7 @@ def create_thread(file_hash):
     return thread.id
 
 
-# TODO oh great their the SDK doesn't support the /v1/threads endpoint yet and no way to get a list of threads. Going directttly to the endpoint requires a browser session token not API key - morons
+# TODO oh great their the SDK doesn't support the /v1/threads endpoint yet and no way to get a list of threads. Going directttly to the endpoint requires a browser session token not API key - morons. See how to update OPENAI_SESSION_KEY above - need fresh browser session key in env file
 def threads(delete=False):
     url = "https://api.openai.com/v1/threads"
     headers = {
@@ -107,10 +107,6 @@ def threads(delete=False):
             client.beta.threads.delete(id)
             time.sleep(1)
     return response.json()
-
-
-# threads(delete=True)
-# print(threads())
 
 
 def run_prompt(thread_id=None, prompt_path=None):
@@ -198,3 +194,8 @@ def prompt_conservative_treatment(thread_id):
 def prompt_guidelines(thread_id):
     log.info(f"Prompting for guidelines on thread {thread_id}")
     return run_prompt(thread_id=thread_id, prompt_path="prompts/guidelines.prompt")
+
+
+if __name__ == "__main__":
+    threads(delete=True)
+    print(threads())
